@@ -143,6 +143,86 @@ def Rotate( angleX, angleY):
 
 
 
+
+
+
+Z_SPEED = 5
+XY_SPEED = 10
+
+def Translate(axis, distance0, distance1, dest):
+	#Each controller must perform its own math for how to manipulate the distances and the axis.
+	#if not CheckMaster(controller):
+	#	return
+	currtime = time.clock()
+	#if( controller.lastTrans != axis or (controller.lastDist0 < 0 and distance0 > 0) or
+	#									(controller.lastDist0 > 0 and distance0 < 0) or
+	#									(controller.lastDist1 < 0 and distance1 > 0) or
+	#									(controller.lastDist1 > 0 and distance1 < 0)):
+	#	controller.startmovetime = currtime
+	global lastmovetime
+	delta = currtime - lastmovetime
+	#controller.lastTrans = axis
+	#controller.lastDist0 = distance0
+	#controller.lastDist1 = distance1
+	#Update 20x a second to avoid choppy chops. Note that any pymol induced lag will kill this.
+	if (delta < .05):
+		return
+
+	#Because we're updating distances, we want a maximum speed as well...
+	#The first frame after a period of non-movement shouldn't move.
+	#if (delta > .25):
+	#	delta = 0
+
+	#coefficient = currtime - controller.startmovetime
+
+	#Get the current view to manipulate the camera
+	#The controller itself should handle the math to determine the distance it changes.
+	#This merely translates
+	view = list(cmd.get_view())
+	if (axis == "Z"):
+		distance0 = distance0  * Z_SPEED #*coefficient
+		view[11] += distance0 * dest[2]
+		
+		view[9] += distance0 * dest[0]
+		view[10] += distance0 * dest[1]
+		
+		view[15] -= distance0 * dest[2]
+		view[16] -= distance0 * dest[2]
+	if (axis == "XY"):
+		distance0 = distance0 * XY_SPEED * .3*.004*(view[11]-view[14])# * coefficient
+		distance1 = distance1 * XY_SPEED * .3*.004*(view[11]-view[14]) # * coefficient
+		#Because X and Y are in relation to camera coordinates, we need to translate the object coordinates properly.
+		#The real vector needs to be rotated:
+		#Need to rotate by inverse of the camera's rotation matrix to line up X, Y properly with respect to camera
+		#Inverse of orthogonal matrix = the transpose of the matrix
+		# 0 3 6              0 1 2
+		# 1 4 7 inverted is: 3 4 5
+		# 2 5 8              6 7 8
+		#            X part         Y part               Z part
+		x = view[0] * distance0 + view[1] * distance1 #+ view[2] * 0
+		y = view[3] * distance0 + view[4] * distance1 #+ view[5] * 0
+		z = view[6] * distance0 + view[7] * distance1 #+ view[8] * 0
+
+		view[12] -= x
+		view[13] -= y
+		view[14] -= z
+
+	cmd.set_view(view)
+	cmd.refresh()
+	#global lastmovetime
+	lastmovetime = time.clock()
+	#DamageGUI()
+
+
+
+def simpleTransZ(dist):
+    	view = cmd.get_view()
+	Translate( "Z", -1 * dist * 1  * 5,\
+		  -1 * dist *  5,[0,0,1])
+
+def simpleTransXY(dist1, dist2):
+    Translate ("XY", dist1, dist2, [0,0,1])
+
 class recieving_Thread(threading.Thread):
     running = 0
     def __init__(self):
@@ -155,13 +235,20 @@ class recieving_Thread(threading.Thread):
     def run(self):
         while self.running:
             data, addr = self.sock.recvfrom( 1024 )
-            print "got some Data!"
+            #print "got some Data!"
             dataStorage = data
 
 	    length = struct.unpack_from("i",data)[0]
 	    #print length
 	    firstData = struct.unpack_from("i" + length * "fffffffffffffffff",data)
-	    Rotate(-firstData[2],-firstData[1])
+	    if(abs(firstData[1]) < .25 and abs(firstData[2]) < .25):
+		continue
+	    if (firstData[10] < .9 and firstData[5] < .1):
+		Rotate(-firstData[2],-firstData[1])
+	    elif (firstData[10] > .9):
+		simpleTransZ(firstData[2])
+	    else:
+		simpleTransXY(-firstData[1],firstData[2])
 	    #print firstData
 
 
