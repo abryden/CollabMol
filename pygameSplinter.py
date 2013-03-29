@@ -75,8 +75,8 @@ class joystickEventSender(threading.Thread):
 						    pygame.joystick.Joystick(x).get_button(5),
 						    pygame.joystick.Joystick(x).get_button(8),
 						    pygame.joystick.Joystick(x).get_button(9),
-						    pygame.joystick.Joystick(x).get_button(10),
-						    pygame.joystick.Joystick(x).get_button(11),
+						    0,
+						    0,
 						    pygame.joystick.Joystick(x).get_hat(0)[0],
 						    pygame.joystick.Joystick(x).get_hat(0)[1],
 						    0]
