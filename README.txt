@@ -24,7 +24,19 @@ https://github.com/abryden/CollabMol
 
 8. Double click on "pygameSplinter.py" to launch it using python (which has pygame installed)
 
-9. 
+9. Launch PyMOL
+
+10. Start CollabMol from the plugin menu
+
+
+
+Ordinary Use instructions (after installed):
+
+1. Turn on game controllers
+
+2. Double click on "pygameSplinter.py" to start the app that talks to the game controllers
+3. Start PyMOL
+4. Launch the CollabMol plugin
 
 
 This will let you control PyMOL using a game controller. This is in pre-alpha
