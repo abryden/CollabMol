@@ -123,6 +123,7 @@ def rotateView(mat,angleX,angleY,angleZ):
 
 
 lastmovetime = 0.0
+currentController = 0
 
 def Rotate( angleX, angleY):
 	#if not CheckMaster(controller):
@@ -239,17 +240,46 @@ class recieving_Thread(threading.Thread):
             dataStorage = data
 
 	    length = struct.unpack_from("i",data)[0]
-	    #print length
-	    firstData = struct.unpack_from("i" + length * "fffffffffffffffff",data)
-	    if(abs(firstData[1]) < .25 and abs(firstData[2]) < .25):
-		continue
-	    if (firstData[10] < .9 and firstData[5] < .1):
-		Rotate(-firstData[2],-firstData[1])
-	    elif (firstData[10] > .9):
-		simpleTransZ(firstData[2])
-	    else:
-		simpleTransXY(-firstData[1],firstData[2])
+	    #print str(length) + " length"
+	    firstData = struct.unpack_from("i" + length * "ffffffffffffffffff",data)
+	    numControllers = firstData[0]
+	    #print str(numControllers) + " controllers"
+	    
+	    currtime = time.clock()
+
+	    global currentController
+	    global lastmovetime
+	    #currentController = 1
+	    #print str(currtime - lastmovetime) + " time delta"
+	    if (currtime - lastmovetime) < .5:
+		
+		offset = currentController*18
+		if(abs(firstData[1+offset]) < .25 and abs(firstData[2+offset]) < .25):
+		    pass
+		    #continue
+		elif (firstData[10+offset] < .9 and firstData[5+offset] < .1):
+		    Rotate(-firstData[2+offset],-firstData[1+offset])
+		elif (firstData[10+offset] > .9):
+		    simpleTransZ(firstData[2+offset])
+		else:
+		    simpleTransXY(-firstData[1+offset],firstData[2+offset])
 	    #print firstData
+	    else:
+		for controller in range(0,numControllers):
+		    currentController = controller
+		    offset = currentController*18
+		    if(abs(firstData[1+offset]) < .25 and abs(firstData[2+offset]) < .25):
+			continue
+		    #continue
+		    elif (firstData[10+offset] < .9 and firstData[5+offset] < .1):
+			Rotate(-firstData[2+offset],-firstData[1+offset])
+			break
+		    elif (firstData[10+offset] > .9):
+			simpleTransZ(firstData[2+offset])
+			break
+		    else:
+			simpleTransXY(-firstData[1+offset],firstData[2+offset])
+			break
 
 
 
