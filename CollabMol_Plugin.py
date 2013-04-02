@@ -301,8 +301,8 @@ class WiiMOL:
 
 def __init__(self):
 	print self.winfo_id()
-	self.menuBar.addcascademenu('Plugin','WiiMOL','WiiMOL',label = 'WiiMOL')
-	self.menuBar.addmenuitem('WiiMOL','command','start WiiMOL', label = 'Start WiiMOL',command = lambda s = self: LoadWiiMOL(s))
+	self.menuBar.addcascademenu('Plugin','CollabMol','CollabMol',label = 'CollabMol')
+	self.menuBar.addmenuitem('CollabMol','command','start CollabMol', label = 'Start CollabMol',command = lambda s = self: LoadWiiMOL(s))
 
 	self.wiimol_running = False
                                      
