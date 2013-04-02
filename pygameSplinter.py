@@ -93,7 +93,7 @@ class joystickEventSender(threading.Thread):
 		
     def send(self):
         formatString = "i" + len(self.controllers) * "ffffffffffffffffff"
-        #print formatString
+        ##print formatString
         array = []
         #print self.JoystickData
         for i in self.JoystickData:
